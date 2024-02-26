@@ -1,2 +1,4 @@
-*/node_modules/
-*/.env
+/TCP_IP_NODE/TCP_IP_NODE_CLIENT/node_modules/
+/TCP_IP_NODE/TCP_IP_NODE_SERVER/node_modules/
+/TCP_IP_NODE/TCP_IP_NODE_CLIENT/.env
+/TCP_IP_NODE/TCP_IP_NODE_SERVER/.env
