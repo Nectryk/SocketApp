@@ -1,8 +1,8 @@
 <?php
-$servername = "localhost";
-$username = "admin";
-$password = "password";
-$database = "clientRegister";
+$servername = $_ENV['DB_SERVERNAME'];
+$username = $_ENV['DB_USERNAME'];
+$password = $_ENV['DB_PASSWORD'];
+$database = $_ENV['DB_NAME'];
 
 $conn = new mysqli($servername, $username, $password, $database);
 
