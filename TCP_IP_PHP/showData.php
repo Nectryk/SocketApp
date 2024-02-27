@@ -1,8 +1,33 @@
 <?php
-$servername = $_ENV['DB_SERVERNAME'];
-$username = $_ENV['DB_USERNAME'];
-$password = $_ENV['DB_PASSWORD'];
-$database = $_ENV['DB_NAME'];
+require 'vendor/autoload.php';
+
+use Aws\Ssm\SsmClient;
+
+$ssmClient = new SsmClient([
+    'version' => 'latest',
+    'region' => 'us-east-1',
+]);
+
+$parameterName = [
+    '/dev/DB_CREDENTIALS',
+];
+
+$parameters = $ssmClient->getParameter([
+    'Name' => $parameterName,
+    'WithDecryption' => true,
+]);
+
+$credentials = json_decode($result['Parameter']['Value'], true);
+$dbEndpoint = $credentials['db-endpoint'];
+$dbUsername = $credentials['username'];
+$dbPassword = $credentials['password'];
+$dbName = $credentials['db-name'];
+
+$servername = $dbEndpoint;
+$username = $dbUsername;
+$password = $dbPassword;
+$database = $dbName;
+
 
 $conn = new mysqli($servername, $username, $password, $database);
 
@@ -13,7 +38,6 @@ if ($conn->connect_error) {
 $sql = "SELECT INET_NTOA(IP) AS IP, PORT FROM clientData";
 $result = $conn->query($sql);
 
-// Crear un array para almacenar los datos
 $data = array();
 
 if ($result->num_rows > 0) {

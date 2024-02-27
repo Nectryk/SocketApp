@@ -1,10 +1,22 @@
-require('dotenv').config();
+//require('dotenv').config();
+const getDatabaseCredentials = require('./credentials');
 const mysql = require('mysql2');
+
+getDatabaseCredentials().then(credentials => {
+    const { dbEndpoint, dbUsername, dbPassword, dbName } = credentials;
+
+    console.log("Database Endpoint:", dbEndpoint);
+    console.log("Database Username:", dbUsername);
+    console.log("Database Password:", dbPassword);
+    console.log("Database Name:", dbName);
+
+
+
 const connection = mysql.createConnection({
-    host: process.env.DB_HOSTNAME,
-    user: process.env.DB_USERNAME,
-    password: process.env.DB_PASSWORD,
-    database: process.env.DB_NAME
+    host: dbEndpoint,
+    user: dbUsername,
+    password: dbPassword,
+    database: dbName
 });
 
 function openConnection() {
@@ -48,3 +60,7 @@ module.exports = {
     insertClientData,
     closeConnection
 };
+
+}).catch(error => {
+    console.error("Error retrieving database credentials:", error);
+});
