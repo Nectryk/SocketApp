@@ -17,9 +17,7 @@ $ssmClient = new SsmClient([
     ],
 ]);
 
-$parameterName = [
-    '/dev/DB_CREDENTIALS',
-];
+$parameterName = '/dev/DB_CREDENTIALS';
 
 $parameters = $ssmClient->getParameter([
     'Name' => $parameterName,
