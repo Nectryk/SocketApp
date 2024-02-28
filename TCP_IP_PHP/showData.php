@@ -3,9 +3,18 @@ require 'vendor/autoload.php';
 
 use Aws\Ssm\SsmClient;
 
+$accessKeyId = getenv('AWS_ACCESS_KEY_ID');
+$secretAccessKey = getenv('AWS_SECRET_ACCESS_KEY');
+$sessionToken = getenv('AWS_SESSION_TOKEN');
+
 $ssmClient = new SsmClient([
     'version' => 'latest',
     'region' => 'us-east-1',
+    'credentials' => [
+        'key' => $accessKeyId,
+        'secret' => $secretAccessKey,
+        'token' => $sessionToken
+    ],
 ]);
 
 $parameterName = [
