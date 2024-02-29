@@ -19,7 +19,7 @@ $ssmClient = new SsmClient([
 
 $parameterName = '/dev/DB_CREDENTIALS';
 
-$parameters = $ssmClient->getParameter([
+$result = $ssmClient->getParameter([
     'Name' => $parameterName,
     'WithDecryption' => true,
 ]);
