@@ -1,25 +1,14 @@
 //require('dotenv').config();
-const getDatabaseCredentials = require('./credentials');
 const mysql = require('mysql2');
 
-getDatabaseCredentials().then(credentials => {
-    const { dbEndpoint, dbUsername, dbPassword, dbName } = credentials;
-
-    console.log("Database Endpoint:", dbEndpoint);
-    console.log("Database Username:", dbUsername);
-    console.log("Database Password:", dbPassword);
-    console.log("Database Name:", dbName);
-
-
-
-const connection = mysql.createConnection({
-    host: dbEndpoint,
-    user: dbUsername,
-    password: dbPassword,
-    database: dbName
-});
-
-function openConnection() {
+function openConnection(dbEndpoint, dbUsername, dbPassword, dbName) {
+    console.log(dbEndpoint);
+    const connection = mysql.createConnection({
+        host: dbEndpoint,
+        user: dbUsername,
+        password: dbPassword,
+        database: dbName
+    });
     connection.connect((err) => {
         if (err) {
             console.error('Error al conectar con MySQL: ' + err.stack);
@@ -27,9 +16,10 @@ function openConnection() {
         }
         console.log('Conexión exitosa a MySQL como id ' + connection.threadId);
     });
+    return connection
 }
 
-function insertClientData(clientAddress, clientPort) {
+function insertClientData(clientAddress, clientPort, connection) {
     const ipv4Address = clientAddress.split(':').pop(); 
     const post = [ipv4Address, clientPort];
 
@@ -45,7 +35,7 @@ function insertClientData(clientAddress, clientPort) {
     });
 }
 
-function closeConnection() {
+function closeConnection(connection) {
     connection.end((err) => {
         if (err) {
             console.error('Error al cerrar la conexión con MySQL: ' + err.stack);
@@ -60,7 +50,3 @@ module.exports = {
     insertClientData,
     closeConnection
 };
-
-}).catch(error => {
-    console.error("Error retrieving database credentials:", error);
-});

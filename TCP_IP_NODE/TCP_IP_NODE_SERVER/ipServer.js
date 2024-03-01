@@ -1,10 +1,19 @@
 const net = require('net');
 require('dotenv').config();
-const db = require('./db');
+const { openConnection, insertClientData, closeConnection } = require('./db');
+const getDatabaseCredentials = require('./retrieveCred');
 
-db.openConnection();
+getDatabaseCredentials().then(credentials => {
+    const { dbEndpoint, dbUsername, dbPassword, dbName } = credentials;
 
-const server = net.createServer((socket) => {
+    console.log("Database Endpoint:", dbEndpoint);
+    console.log("Database Username:", dbUsername);
+    console.log("Database Password:", dbPassword);
+    console.log("Database Name:", dbName);
+
+    // Call the openConnection function with retrieved credentials
+    const connection = openConnection(dbEndpoint, dbUsername, dbPassword, dbName);
+    const server = net.createServer((socket) => {
     console.log('Cliente conectado');
     console.log('Dirección IP del cliente: ' + socket.remoteAddress);
     console.log('Puerto del cliente: ' + socket.remotePort);
@@ -15,7 +24,7 @@ const server = net.createServer((socket) => {
         console.log(`Datos recibidos del cliente: ${data}`);
     });
 
-    db.insertClientData(socket.remoteAddress, socket.remotePort);
+    insertClientData(socket.remoteAddress, socket.remotePort, connection);
 
     socket.on('end', () => {
         console.log('Cliente desconectado');
@@ -32,5 +41,8 @@ server.listen(PORT, () => {
 
 server.on('close', () => {
     console.log('Cerrando conexión con MySQL');
-    db.closeConnection();
+    closeConnection(connection);
+});
+}).catch(error => {
+    console.error("Error retrieving database credentials:", error);
 });
