@@ -1,8 +1,8 @@
 const net = require('net');
 require('dotenv').config();
 
-const serverHost = process.env.IP;
-const serverPort = process.env.PORT;
+const serverHost = process.env.IP_SERVER;
+const serverPort = process.env.PORT_SERVER;
 
 const datosenviados = '¡Hola, servidor!';
 
