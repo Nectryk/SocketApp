@@ -29,3 +29,27 @@ response = client.put_parameter(
 )
 
 print("Parameter created:", response)
+
+access_key_id = input("Enter your AWS Access Key ID: ")
+secret_access_key = getpass.getpass("Enter your AWS Secret Access Key: ")
+session_token = input("Enter your AWS Session Token: ")
+
+aws_credentials = {
+    "access_key_id": access_key_id,
+    "secret_access_key": secret_access_key,
+    "session_token": session_token
+}
+
+value = json.dumps(aws_credentials)
+
+response = client.put_parameter(
+    Name='/dev/AWS_CREDENTIALS',
+    Description='AWS temporary credentials',
+    Value=value,
+    Type='SecureString',
+    Overwrite=True,
+    Tier='Standard',
+    DataType='text'
+)
+
+print("Parameter created:", response)

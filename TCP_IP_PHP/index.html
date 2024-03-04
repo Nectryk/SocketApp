@@ -23,8 +23,15 @@
         fetch('showData.php')
             .then(response => response.json())
             .then(data => {
+                if (data.fromCache) {
+                    // Display message indicating data was retrieved from cache
+                    console.log('Data retrieved from cache');
+                } else {
+                    // Display message indicating data was fetched from the database
+                    console.log('Data fetched from the database');
+                }
                 const dataTable = document.getElementById('data-table');
-                data.forEach(row => {
+                data.data.forEach(row => {
                     const newRow = document.createElement('tr');
                     newRow.innerHTML = `<td>${row.IP}</td><td>${row.PORT}</td>`;
                     dataTable.appendChild(newRow);

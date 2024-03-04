@@ -6,57 +6,77 @@ use Aws\Ssm\SsmClient;
 $current_user = get_current_user();
 $config = include 'config.php';
 
-$accessKeyId = $config['AWS_ACCESS_KEY_ID'];
-$secretAccessKey = $config['AWS_SECRET_ACCESS_KEY'];
-$sessionToken = $config['AWS_SESSION_TOKEN'];
+$memcached = new Memcached();
+$memcached->addServer($config['CLUSTER_ENDPOINT'], 11211);
+$key = 'data_from_mysql';
+$data = $memcached->get($key);
+$fromCache = false;
 
-$ssmClient = new SsmClient([
-    'version' => 'latest',
-    'region' => 'us-east-1',
-    'credentials' => [
-        'key' => $accessKeyId,
-        'secret' => $secretAccessKey,
-        'token' => $sessionToken
-    ],
-]);
+if (!$data) {
+    $accessKeyId = $config['AWS_ACCESS_KEY_ID'];
+    $secretAccessKey = $config['AWS_SECRET_ACCESS_KEY'];
+    $sessionToken = $config['AWS_SESSION_TOKEN'];
 
-$parameterName = '/dev/DB_CREDENTIALS';
+    $ssmClient = new SsmClient([
+        'version' => 'latest',
+        'region' => 'us-east-1',
+        'credentials' => [
+            'key' => $accessKeyId,
+            'secret' => $secretAccessKey,
+            'token' => $sessionToken
+        ],
+    ]);
 
-$result = $ssmClient->getParameter([
-    'Name' => $parameterName,
-    'WithDecryption' => true,
-]);
+    $parameterName = '/dev/DB_CREDENTIALS';
 
-$credentials = json_decode($result['Parameter']['Value'], true);
-$dbEndpoint = $credentials['db-endpoint'];
-$dbUsername = $credentials['username'];
-$dbPassword = $credentials['password'];
-$dbName = $credentials['db-name'];
+    $result = $ssmClient->getParameter([
+        'Name' => $parameterName,
+        'WithDecryption' => true,
+    ]);
 
-$servername = $dbEndpoint;
-$username = $dbUsername;
-$password = $dbPassword;
-$database = $dbName;
+    $credentials = json_decode($result['Parameter']['Value'], true);
+    $dbEndpoint = $credentials['db-endpoint'];
+    $dbUsername = $credentials['username'];
+    $dbPassword = $credentials['password'];
+    $dbName = $credentials['db-name'];
+
+    $servername = $dbEndpoint;
+    $username = $dbUsername;
+    $password = $dbPassword;
+    $database = $dbName;
 
 
-$conn = new mysqli($servername, $username, $password, $database);
+    $conn = new mysqli($servername, $username, $password, $database);
 
-if ($conn->connect_error) {
-    die("Conexión fallida: " . $conn->connect_error);
-}
-
-$sql = "SELECT INET_NTOA(IP) AS IP, PORT FROM clientData";
-$result = $conn->query($sql);
-
-$data = array();
-
-if ($result->num_rows > 0) {
-    while($row = $result->fetch_assoc()) {
-        $data[] = $row;
+    if ($conn->connect_error) {
+        die("Conexión fallida: " . $conn->connect_error);
     }
+
+    $sql = "SELECT INET_NTOA(IP) AS IP, PORT FROM clientData";
+    $result = $conn->query($sql);
+
+    $data = array();
+
+    if ($result->num_rows > 0) {
+        while($row = $result->fetch_assoc()) {
+            $data[] = $row;
+        }
+    }
+
+    $conn->close();
+
+    $memcached->set('data_from_mysql', $data, 10);
+
+}
+else {
+    $fromCache = true;
 }
 
-$conn->close();
+$response = array(
+    'data' => $data,
+    'fromCache' => $fromCache
+);
 
-echo json_encode($data);
+echo json_encode($response);
+
 ?>
