@@ -1,10 +1,10 @@
-#AWS Infrastructure Deployment for Client-Server Application
+# AWS Infrastructure Deployment for Client-Server Application
 
 [Architecture](https://github.com/Nectryk/SocketApp/blob/main/ArchitectureSocketApp.drawio.png)
 
 This project contains an application which is a client who communicates via socket to a server in NodeJS, the server harvest the client IP and PORT and insert the data to a MySQL database. Inspired by IoT, this project aims to facilitate seamless data handling. In addition, to check the data from the database I created a web application on apache web server, PHP retrieves data from Elasticache Memcached if it's there, if not, it query the database and upload the data to the cache in a lazy loading cache strategy. an ALB (Application Load Balancer) and ASG (Auto Scaling Group) allows my web application to be fully scalable and highly available. Thanks to Python and Boto3 I can upload my database credentials and AWS credentials to the SSM Parameter Store so my applications can use them in a secure way. Due to my AWS Academy account restriction I had to introduce my credentials to SSM Parameter Store but in a real environment you should use an appropriate Instance Role so the application communicates with instance metadata to interact with other AWS resources. To keep pinging from the client I made use of a cron job in the User data. The database credentials are stored in the secrets.tfvars and in plain text in the PHP instance User data, Although the secrets.tfvars has been exemplarily pushed to Git, in actual deployments, it should be excluded via .gitignore. In a production environment you must avoid including credentials in plain text, database hardening should be done in a different way, Nonetheless, this approach was adopted for testing purposes.
 
-##Prerequisites
+## Prerequisites
 
 Before running the deployment scripts, ensure that you have the following prerequisites:
 
@@ -13,7 +13,7 @@ Before running the deployment scripts, ensure that you have the following prereq
 - Python 3 installed on your local machine.
 - Git installed for version control.
 
-##Application deployment
+## Application deployment
 
 1. Clone the repository to your local machine
 
